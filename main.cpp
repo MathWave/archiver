@@ -76,12 +76,31 @@ std::string FromBinaryStringIntoByteString(std::string binary)
     return result;
 }
 
+std::pair<std::string, std::string> NewArchAdress(std::string str)
+{
+    std::string new_str = "";
+    int i;
+    for (i = 0; str[i] != '.'; i++)
+        new_str += str[i];
+    std::string add;
+    i++;
+    while (i < str.size())
+    {
+        add += str[i];
+        i++;
+    }
+    new_str += ".mathwavearch";
+    return {new_str, add};
+}
+
 //Функция архивации
 
-void EnCode()
+void EnCode(std::string root)
 {
-    std::ifstream fin("Откуда берем");
-    std::ofstream fout("Куда сохраняем");
+    std::ifstream fin(root);
+    std::pair<std::string, std::string> p = NewArchAdress(root);
+    std::ofstream fout(p.first);
+    fout << p.second << std::endl;
     std::vector<std::string> full_string;
     std::string buff;
     std::vector<pnode> letters;
@@ -103,7 +122,8 @@ void EnCode()
     while (letters.size() != 1)
     {
         std::sort(letters.begin(), letters.end(), Compare);
-        pnode p = new node (NULL, letters[letters.size() - 1]->amount + letters[letters.size() - 2]->amount, letters[letters.size() - 2], letters[letters.size() - 1]);
+        pnode p = new node (NULL, letters[letters.size() - 1]->amount + letters[letters.size() - 2]->amount,
+                            letters[letters.size() - 2], letters[letters.size() - 1]);
         letters[letters.size() - 2] = p;
         letters.pop_back();
     }
@@ -183,14 +203,27 @@ std::string FromStringIntoBinary(std::string s)
     return binary;
 }
 
+std::string FromArch(std::string str)
+{
+    std::string new_str = "";
+    for (int i = 0; str[i] != '.'; i++)
+        new_str += str[i];
+    std::ifstream fin(str);
+    std::string add = "";
+    fin >> add;
+    new_str += ("." + add);
+    return new_str;
+}
+
 //Функция извлечения
 
-void DeCode()
+void DeCode(std::string root)
 {
-    std::ifstream fin("Откуда берем");
-    std::ofstream fout("Куда сохраняем");
+    std::ifstream fin(root);
+    std::ofstream fout(FromArch(root));
     std::map<std::string, char> reversed_dictionary;
     std::string buffer;
+    getline(fin, buffer);
     int t = 0;
     while (1)
     {
@@ -232,10 +265,7 @@ void DeCode()
 int main()
 {
     setlocale(LC_ALL, "Russian");
-    int start = time(0);
-    EnCode();
-    int end = time(0);
-    std::cout << end - start << " seconds for Encoding" << std::endl;
-    DeCode();
-    std::cout << time(0) - end << " seconds for Decoding" << std::endl;
+    std::string file = "Ссылка на файл";
+    EnCode(file); //Сжать
+    DeCode(file); //Разжать
 }
